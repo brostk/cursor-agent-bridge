@@ -1,0 +1,8 @@
+# Runtime data — never commit case or feature data
+agent_bridge_data/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
