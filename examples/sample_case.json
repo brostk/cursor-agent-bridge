@@ -1,0 +1,5 @@
+{
+  "case_id": "checkout-502-001",
+  "title": "sponsor and/or bene city/state are missing",
+  "problem": "VES validations in vets-website under ivc_champva are occasionally failing in production with 'sponsor state is missing' or 'beneficiary city is missing'."
+}

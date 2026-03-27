@@ -1,0 +1,29 @@
+---
+description: Agent Bridge debugging discipline
+globs:
+alwaysApply: false
+---
+
+When debugging a full-stack issue with multiple agents:
+
+- use the Agent Bridge MCP as the source of truth for cross-agent communication
+- keep frontend and backend responsibilities separate
+- every meaningful conclusion must include evidence
+- every question must be narrow and answerable
+- separate facts, hypotheses, and unknowns
+- prefer eliminating one hypothesis before creating a new one
+- do not mark a case resolved until root cause, fix, and validation steps are explicit
+
+Preferred bug buckets:
+- route mismatch
+- schema mismatch
+- auth/session issue
+- CORS / headers / CSRF
+- environment/config drift
+- async timing / race
+- stale contract drift
+- serialization bug
+- backend exception
+- upstream dependency failure
+- cache inconsistency
+- optimistic UI masking real failure
