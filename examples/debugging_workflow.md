@@ -1,6 +1,6 @@
 # Example: Debugging Workflow
 
-**Scenario:** A checkout form is returning a 502. The frontend team suspects a payload mismatch; the backend team suspects an upstream validation error. You want both to investigate simultaneously and converge on a root cause.
+**Scenario:** A checkout form is returning a 502. The frontend team suspects a payload mismatch; the backend team suspects an upstream validation error.
 
 ---
 
@@ -8,70 +8,68 @@
 
 ### Step 1 — Orchestrator window
 
-> Create a new agent-bridge case with ID `checkout-502-001`, title "Checkout 502 on submit", and this problem statement: "The checkout form returns a 502 intermittently on submit. The frontend sends a billing address with `country: 'United States'` but the upstream validator may expect an ISO-2 code. Neither team has confirmed where the failure originates."
+> Investigate why the checkout form is returning a 502. The frontend is sending `billingAddress.country: "United States"` but the backend appears to expect an ISO-2 code. Use `checkout-502-001` as the case ID.
 
-The agent creates the case and confirms. That's all you do in this window for now.
+The orchestrator creates the case, confirms the ID back to you, and **immediately starts monitoring**. You'll see status updates appear in this window as the agents work.
 
 ---
 
 ### Step 2 — Frontend repo window
 
-> You are the frontend investigator on case `checkout-502-001`. Use the agent-bridge MCP tools for all cross-agent communication. Start by tracing how the billing address — specifically the country field — is collected, transformed, and included in the checkout request payload. Post your first finding to the case.
-
-Then leave it alone.
+> Pick up case `checkout-502-001` as the frontend investigator and start tracing how the billing country field is built, transformed, and submitted.
 
 ---
 
 ### Step 3 — Backend repo window
 
-> You are the backend investigator on case `checkout-502-001`. Use the agent-bridge MCP tools for all cross-agent communication. Start by tracing what the checkout endpoint receives, how the billing address is serialized before forwarding to the upstream service, and what the upstream validator expects. Post your first finding to the case.
-
-Then leave it alone.
+> Pick up case `checkout-502-001` as the backend investigator and start tracing how the country value is received, serialized, and forwarded to the upstream validator.
 
 ---
 
-## What happens next (you're not involved)
+## What you watch
 
-The agents run independently. Each one:
+Only the **orchestrator window**. It will report something like:
 
-1. Investigates its side of the stack
-2. Posts findings, hypotheses, and questions to the shared case
-3. Reads what the other agent posted
-4. Refines its hypothesis and posts again
-5. Repeats until the root cause is clear
+> **Update — cycle 1:**
+> Frontend found that `transformFormData()` passes the full country name through unchanged. Network tab confirms `"United States"` reaches vets-api.
+>
+> Backend has not posted yet. I've nudged them to check the VES serializer.
+>
+> Leading hypothesis: country name is reaching VES without normalization. Waiting for backend to confirm what VES expects.
 
-A typical exchange looks like this (you don't write any of this — the agents do):
+> **Update — cycle 2:**
+> Backend confirmed: VES expects ISO-2. The serializer does no normalization. Backend also found that the city field is dropped when `country != "USA"` — which is a second bug.
+>
+> I've posted a message asking frontend to confirm whether their end also needs the normalization, or whether this is purely a backend responsibility.
+>
+> Root cause is close. Both bugs are on the backend side.
 
-- **Frontend posts:** Found that `transformFormData()` passes `country: 'United States'` through unchanged. Network tab confirms the full country name reaches the backend.
-- **Backend reads it, then posts:** Confirmed — backend receives the full name. The upstream serializer maps it to a `stateCode` field and the validator rejects anything that isn't ISO-2. This is the root cause.
-- **Frontend reads it, posts:** Agreed. Frontend can normalize to ISO-2 before sending. Backend should also return a 422 instead of letting it bubble to a 502.
-
----
-
-## Step 4 — Resolve (any window)
-
-When the agents have converged, ask any of them:
-
-> Resolve case `checkout-502-001` with the root cause, proposed fix, and validation steps the agents identified.
-
-The agent reads the findings from the case and calls `resolve_case` on your behalf.
+> **Update — cycle 3:**
+> Both agents agree on root cause. I'm asking the backend agent to propose a fix.
 
 ---
 
-## Checking in (optional)
+## What you do at the end
 
-At any point you can ask any agent:
+Nothing. The orchestrator reports when the case is resolved:
 
-> What's the current status of case `checkout-502-001`? Summarize what each agent has found so far.
-
-You never need to copy messages between windows or tell either agent to "check for updates."
+> **Case resolved.**
+>
+> **Root cause:** Two bugs in the backend VES serializer. (1) Country name is not normalized to ISO-2. (2) City is conditionally excluded when `country != "USA"`, but the frontend sends `"US"`.
+>
+> **Fix:** Normalize country to ISO-2 on intake. Remove the city exclusion condition or fix the comparison to accept both "US" and "USA".
+>
+> **Validation steps:**
+> - Submit with a US address — no VES validation errors
+> - Submit with a non-US address — city is still included in the VES payload
+> - Run ivc_champva VES integration specs
 
 ---
 
-## After the investigation — tracking the fix
+## If you want to track the fix
 
-If you want to track the implementation as a feature:
+Tell the orchestrator:
 
-> Create a feature linked to case `checkout-502-001` to fix the country code mismatch. The fix requires a backend serializer change and a frontend normalization step. Create tasks for each and dispatch.
+> Create a feature linked to case `checkout-502-001` to implement the backend fix and any needed frontend changes. Plan the tasks and dispatch.
 
-Then prompt the frontend and backend windows once each to pick up their tasks. See `delivery_workflow.md` for how that plays out.
+Then prompt each agent window once to pick up their task. The orchestrator monitors delivery the same way it monitored the investigation.
