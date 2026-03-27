@@ -1,0 +1,47 @@
+[
+  {
+    "task_id": "task-be-001",
+    "feature_id": "feat-checkout-country-001",
+    "title": "Add ISO-2 validation to checkout endpoint",
+    "description": "In POST /api/v1/checkout, validate billingAddress.country against ISO 3166-1 alpha-2. Return 422 with field error per contract-checkout-payload-v2 if invalid. Do not raise a 500.",
+    "owner_role": "backend",
+    "status": "pending",
+    "dependencies": [],
+    "linked_case_id": "checkout-502-001",
+    "created_at": "2026-03-27T00:00:00+00:00",
+    "updated_at": "2026-03-27T00:00:00+00:00",
+    "claimed_at": null,
+    "completed_at": null,
+    "result_summary": null
+  },
+  {
+    "task_id": "task-fe-001",
+    "feature_id": "feat-checkout-country-001",
+    "title": "Normalize country to ISO-2 before checkout submission",
+    "description": "In the checkout form submit handler, convert the country dropdown value to ISO-2 using a lookup table before POSTing to /api/v1/checkout. Reference contract-checkout-payload-v2 for the expected field name and format.",
+    "owner_role": "frontend",
+    "status": "pending",
+    "dependencies": ["task-be-001"],
+    "linked_case_id": "checkout-502-001",
+    "created_at": "2026-03-27T00:00:00+00:00",
+    "updated_at": "2026-03-27T00:00:00+00:00",
+    "claimed_at": null,
+    "completed_at": null,
+    "result_summary": null
+  },
+  {
+    "task_id": "task-e2e-001",
+    "feature_id": "feat-checkout-country-001",
+    "title": "E2E: validate country normalization end-to-end",
+    "description": "Test the full checkout flow with US, CA, GB (should return 201) and 'United States' (should be normalized by frontend before sending). Verify no 502 regressions across all existing checkout scenarios.",
+    "owner_role": "test_e2e",
+    "status": "pending",
+    "dependencies": ["task-be-001", "task-fe-001"],
+    "linked_case_id": null,
+    "created_at": "2026-03-27T00:00:00+00:00",
+    "updated_at": "2026-03-27T00:00:00+00:00",
+    "claimed_at": null,
+    "completed_at": null,
+    "result_summary": null
+  }
+]

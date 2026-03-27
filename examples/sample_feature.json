@@ -1,0 +1,17 @@
+{
+  "feature_id": "feat-checkout-country-001",
+  "title": "Normalize country code in checkout",
+  "description": "Frontend sends full country names ('United States'); backend expects ISO 3166-1 alpha-2 codes ('US'). This causes a 502 on checkout submission. Normalize on the frontend before submission and add explicit backend validation.",
+  "status": "created",
+  "acceptance_criteria": [
+    "Frontend converts country display names to ISO-2 codes before submitting",
+    "Backend validates and rejects non-ISO-2 values with 422 + descriptive error",
+    "E2E test covers: US, CA, GB, and invalid 'United States' input",
+    "No regressions in existing checkout flow"
+  ],
+  "linked_case_ids": ["checkout-502-001"],
+  "blocking_reason": null,
+  "human_input_question": null,
+  "created_at": "2026-03-27T00:00:00+00:00",
+  "updated_at": "2026-03-27T00:00:00+00:00"
+}

@@ -1,0 +1,62 @@
+{
+  "contract_id": "contract-checkout-payload-v2",
+  "feature_id": "feat-checkout-country-001",
+  "title": "Checkout request payload v2",
+  "description": "Defines the expected shape of POST /api/v1/checkout after the country normalization fix.",
+  "contract_type": "payload",
+  "version": "2.0",
+  "definition": {
+    "method": "POST",
+    "path": "/api/v1/checkout",
+    "auth": "Bearer token in Authorization header",
+    "request": {
+      "billingAddress": {
+        "name": "string",
+        "line1": "string",
+        "line2": "string | null",
+        "city": "string",
+        "state": "string",
+        "postalCode": "string",
+        "country": {
+          "type": "string",
+          "format": "ISO 3166-1 alpha-2",
+          "example": "US",
+          "invalid_example": "United States",
+          "note": "Frontend MUST normalize to ISO-2 before sending. Backend MUST reject non-ISO-2 with 422."
+        }
+      },
+      "items": [
+        {
+          "sku": "string",
+          "quantity": "integer",
+          "unitPrice": "number (cents)"
+        }
+      ]
+    },
+    "response_success": {
+      "status": 201,
+      "body": {
+        "order_id": "string (uuid)",
+        "status": "confirmed",
+        "created_at": "ISO 8601 timestamp"
+      }
+    },
+    "response_validation_error": {
+      "status": 422,
+      "body": {
+        "errors": [
+          {
+            "field": "billingAddress.country",
+            "message": "must be a valid ISO 3166-1 alpha-2 code"
+          }
+        ]
+      }
+    },
+    "response_server_error": {
+      "status": 500,
+      "note": "Must NOT occur for country code issues — these are always 422"
+    }
+  },
+  "created_at": "2026-03-27T00:00:00+00:00",
+  "updated_at": "2026-03-27T00:00:00+00:00"
+}
